@@ -1,6 +1,6 @@
 import csv
 import re
-import mysql.connector
+import pymysql
 from credentials import username, password
 
 def process_csv(input_file):
@@ -64,6 +64,15 @@ def write_csv(output_file, output_rows):
             writer.writerow(row)
 
 def prep_csv_for_sql(input_file):
+    status_map = {
+        "pending": 0,
+        "vsn": 1,
+        "reliable": 2,
+        "mixed": 3,
+        "unreliable": 4,
+        "conspiracy": 5,
+        "blocked": 6
+    }
     output_rows = []
     with open(input_file, 'r') as csvfile:
         csvreader = csv.DictReader(csvfile)
@@ -76,22 +85,7 @@ def prep_csv_for_sql(input_file):
             # Process row_status
             if "assessmentStatus" in row:
                 status = row["assessmentStatus"].lower()
-                if status == "pending":
-                    processed_row["status"] = 0
-                elif status == "vsn":
-                    processed_row["status"] = 1
-                elif status == "reliable":
-                    processed_row["status"] = 2
-                elif status == "mixed":
-                    processed_row["status"] = 3
-                elif status == "unreliable":
-                    processed_row["status"] = 4
-                elif status == "conspiracy":
-                    processed_row["status"] = 5
-                elif status == "blocked":
-                    processed_row["status"] = 6
-                else:
-                    processed_row["status"] = None
+                processed_row["status"] = status_map[status]
 
             processed_row["perennial_source"] = 1
             output_rows.append(processed_row)
@@ -100,8 +94,8 @@ def prep_csv_for_sql(input_file):
 
 def insert_into_db(rows):
     try:
-        conn = mysql.connector.connect(user=username, password=password,
-                                        host='tools.db.svc.wikimedia.cloud', database='s55412__cited_urls_p')
+        conn = pymysql.connect(user=username, password=password,
+                               host='tools.db.svc.wikimedia.cloud', database='s55412__cited_urls_p')
         cursor = conn.cursor()
 
         for row in rows:
@@ -118,7 +112,7 @@ def insert_into_db(rows):
         print(f"Error inserting data into the database: {e}")
 
     finally:
-        if conn.is_connected():
+        if conn.open:
             conn.close()
 
 input_file = '2023-04-12-run01-derived.csv'
