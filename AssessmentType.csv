@@ -1,0 +1,8 @@
+id,label,description,emoji
+0,Stale/In-Progress,discussion regarding this source's reliability is ongoing,⏳️
+1,VSN+,member of Vaccine Safety Net,🔹
+2,Reliable,source is generally considered reliable as a source of information in this context,✅
+3,Mixed,source has inconsistent reliability and should be used with discretion,⚠️
+4,Unreliable,source is generally considered unreliable as a source of information,🚫
+5,Conspiracy,source promotes conspiracy theories and should not be used,🛑
+6,Blocked,source cannot be used on Wikipedia due to technical restrictions,✖️
