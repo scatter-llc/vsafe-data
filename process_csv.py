@@ -1,6 +1,7 @@
 import csv
 import re
 import mysql.connector
+from credentials import username, password
 
 def process_csv(input_file):
     output_rows = []
@@ -99,7 +100,7 @@ def prep_csv_for_sql(input_file):
 
 def insert_into_db(rows):
     try:
-        conn = mysql.connector.connect(user='<username>', password='<password>',
+        conn = mysql.connector.connect(user=username, password=password,
                                         host='tools.db.svc.wikimedia.cloud', database='s55412__cited_urls_p')
         cursor = conn.cursor()
 
