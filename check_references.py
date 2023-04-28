@@ -29,7 +29,7 @@ def process_wikipedia_urls(article_urls, connection):
                         "SELECT id FROM domains WHERE domain = %s",
                         (first_level_domain,)
                     )
-                    domain_id = cursor.fetchone()
+                    domain_id = cursor.fetchone()["id"]
 
                     if domain_id is None:
                         # If not found, insert the First Level Domain into the domains table
