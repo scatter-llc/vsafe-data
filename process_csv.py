@@ -85,7 +85,10 @@ def prep_csv_for_sql(input_file):
             # Process row_status
             if "assessmentStatus" in row:
                 status = row["assessmentStatus"].lower()
-                processed_row["status"] = status_map[status]
+                if status in status_map:
+                    processed_row["status"] = status_map[status]
+                else:
+                    processed_row["status"] = None
 
             processed_row["perennial_source"] = 1
             output_rows.append(processed_row)
