@@ -23,6 +23,10 @@ def process_wikipedia_urls(article_urls, connection):
                 first_level_domain = entry.get("first_level_domain")
                 url = entry.get("url")
 
+                # Skip the row if any of the columns are missing or empty
+                if not first_level_domain or not url or not article_url:
+                    continue
+
                 with connection.cursor() as cursor:
                     # Check if the First Level Domain exists in the domains table
                     cursor.execute(
