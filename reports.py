@@ -102,50 +102,52 @@ def generate_wikipage():
 
     # Create the wiki page content
     wiki_page = f"""
-    <onlyinclude>{{{{VSAFE metrics dashboard
-    | articles = {articles_in_scope}
-    | domains = {domains_linked}
-    | percent_reliable = {links_to_known_reliable_sources}
-    | percent_flagged = {links_to_unknown_domains}
-    | percent_unknown = {links_to_flagged_sources}
-    }}}}</onlyinclude>
+<onlyinclude>{{{{VSAFE metrics dashboard
+| articles = {articles_in_scope}
+| domains = {domains_linked}
+| percent_reliable = {links_to_known_reliable_sources}
+| percent_flagged = {links_to_unknown_domains}
+| percent_unknown = {links_to_flagged_sources}
+}}}}</onlyinclude>
 
-    ==Frequent domain use==
-    {{| class="wikitable"
-    ! Domain
-    ! Count
-    ! Appears on articles
-    |-
-    """
+==Frequent domain use==
+{{| class="wikitable"
+! Domain
+! Count
+! Appears on articles
+|-
+"""
 
     for domain, url_count, urls_appeared_on in frequent_domains:
-        wiki_page += f"""| {domain}
-    | {url_count}
-    | {to_wikilinks(urls_appeared_on)}
-    |-
-    """
+        wiki_page += f"""
+| {domain}
+| {url_count}
+| {to_wikilinks(urls_appeared_on)}
+|-
+"""
 
     wiki_page += """
-    |}
+|}
 
-    ==Flagged domain use==
-    {| class="wikitable"
-    ! Domain
-    ! Status
-    ! Appears on articles
-    |-
-    """
+==Flagged domain use==
+{| class="wikitable"
+! Domain
+! Status
+! Appears on articles
+|-
+"""
 
     for domain, status, urls_appeared_on in flagged_domains:
-        wiki_page += f"""| {domain}
-    | {status}
-    | {to_wikilinks(urls_appeared_on)}
-    |-
-    """
+        wiki_page += f"""
+| {domain}
+| {status}
+| {to_wikilinks(urls_appeared_on)}
+|-
+"""
 
     wiki_page += """
-    |}
-    """
+|}
+"""
 
     return wiki_page
 
