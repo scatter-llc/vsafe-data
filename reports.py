@@ -29,7 +29,7 @@ def to_wikilinks(url_string):
     wikilinks = []
     for url in urls:
         url = url.strip()
-        title = url.split('/')[-1]
+        title = url.split('/')[-1].replace('_', ' ')
         wikilink = f"[[{title}]]"
         wikilinks.append(wikilink)
     formatted_links = ', '.join(wikilinks)
