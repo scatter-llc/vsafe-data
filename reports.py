@@ -24,24 +24,14 @@ def execute_query(query):
     return cursor.fetchall()
 
 def to_wikilinks(url_string):
-    # Split the input string into a list of URLs
-    urls = urls.replace(',https://', '\thttps://')
+    url_string = url_string.replace(',https://', '\thttps://')
     urls = url_string.split('\t')
-
     wikilinks = []
-
     for url in urls:
-        # Remove leading and trailing whitespace
         url = url.strip()
-
-        # Extract the title part from the Wikipedia URL
         title = url.split('/')[-1]
-
-        # Format the title as a wikilink
         wikilink = f"[[{title}]]"
         wikilinks.append(wikilink)
-
-    # Join the wikilinks with a comma and space separator
     formatted_links = ', '.join(wikilinks)
     return formatted_links
 
