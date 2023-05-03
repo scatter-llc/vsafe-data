@@ -106,12 +106,12 @@ def generate_wikipage():
 | articles = {articles_in_scope}
 | domains = {domains_linked}
 | percent_reliable = {links_to_known_reliable_sources}
-| percent_flagged = {links_to_unknown_domains}
-| percent_unknown = {links_to_flagged_sources}
+| percent_flagged = {links_to_flagged_sources}
+| percent_unknown = {links_to_unknown_domains}
 }}}}</onlyinclude>
 
 ==Frequent domain use==
-{{| class="wikitable"
+{{| class="wikitable sortable"
 ! Domain
 ! Count
 ! Appears on articles
@@ -130,7 +130,7 @@ def generate_wikipage():
 |}
 
 ==Flagged domain use==
-{| class="wikitable"
+{| class="wikitable sortable"
 ! Domain
 ! Status
 ! Appears on articles
