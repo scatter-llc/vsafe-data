@@ -67,7 +67,10 @@ def process_wikipedia_urls(article_urls, connection):
                         "SELECT COUNT(*) FROM urls WHERE url = %s AND url_appeared_on = %s",
                         (url, article_url)
                     )
-                    count = cursor.fetchone()[0]
+                    try:
+                        count = cursor.fetchone()[0]
+                    except:
+                        count = 0
 
                     # Insert a row into the urls table if it doesn't already exist
                     if count == 0:
