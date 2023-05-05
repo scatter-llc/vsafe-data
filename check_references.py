@@ -2,6 +2,7 @@ import requests
 import datetime
 import pymysql
 import re
+import time
 from tld import get_fld
 from urllib.parse import quote, urlparse
 from credentials import username, password
