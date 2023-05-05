@@ -104,11 +104,14 @@ def process_wikipedia_urls(article_urls, connection):
                             "INSERT INTO urls (url, url_appeared_on, domain_id, last_updated) VALUES (%s, %s, %s, %s)",
                             (url, article_url, domain_id, now)
                         )
+                        connection.commit()
                     else:
                         cursor.execute(
                             "UPDATE urls SET last_updated = %s WHERE url = %s AND url_appeared_on = %s",
                             (now, url, article_url)
                         )
+                        connection.commit()
+
 
 
         else:
