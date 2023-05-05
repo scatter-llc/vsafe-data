@@ -3,7 +3,7 @@ import datetime
 import pymysql
 import re
 from tld import get_fld
-from urllib.parse import quote
+from urllib.parse import quote, urlparse
 from credentials import username, password
 
 def remove_archive_prefix(url, first_level_domain):
@@ -12,7 +12,10 @@ def remove_archive_prefix(url, first_level_domain):
 
     if match:
         url = re.sub(pattern, '', url)
-        first_level_domain = get_fld(url)
+        first_level_domain = get_fld(url, fail_silently=True)
+        # For IP address-based URLs
+        if first_level_domain is None:
+            first_level_domain = urlparse(url).hostname
         return url, first_level_domain
     else:
         return url, first_level_domain
