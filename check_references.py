@@ -39,6 +39,7 @@ def remove_archive_prefix(url, first_level_domain):
 
 def process_wikipedia_urls(article_urls, connection):
     now = int(datetime.datetime.now().strftime("%Y%m%d%H%M%S"))
+    max_retries = 8
 
     base_url = (
         "https://check-references.toolforge.org/v2/statistics/all?"
@@ -48,7 +49,7 @@ def process_wikipedia_urls(article_urls, connection):
     for article_url in article_urls:
         encoded_article_url = quote(article_url, safe='/:')
         request_url = base_url.format(url=encoded_article_url)
-        response = get_response_with_backoff(request_url)
+        response = get_response_with_backoff(request_url, max_retries=max_retries)
 
         if response is None:
             print(f"Error: Unable to process {article_url}, status code: 500 after {max_retries} retries")
