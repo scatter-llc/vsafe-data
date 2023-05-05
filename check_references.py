@@ -42,7 +42,7 @@ def process_wikipedia_urls(article_urls, connection):
     max_retries = 8
 
     base_url = (
-        "https://check-references.toolforge.org/v2/statistics/all?"
+        "https://archive.org/services/context/iari/v2/statistics/all?"
         "url={url}&regex=test"
     )
 
