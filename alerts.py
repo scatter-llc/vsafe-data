@@ -1,13 +1,14 @@
 import pymysql
 import requests
+from credentials import hostname, dbname, username, password
 
 # Connect to MySQL database
 def create_conn():
     try:
-        connection = pymysql.connect(user='your_user',
-                                     password='your_password',
-                                     host='your_host',
-                                     database='database_name')
+        connection = pymysql.connect(user=username,
+                                     password=password,
+                                     host=hostname,
+                                     database=dbname)
         return connection
     except pymysql.Error as e:
         print(f"Error while connecting to MySQL: {e}")

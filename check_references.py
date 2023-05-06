@@ -5,7 +5,7 @@ import requests
 import time
 from tld import get_fld
 from urllib.parse import quote, urlparse
-from credentials import username, password
+from credentials import hostname, dbname, username, password
 
 def get_external_links_and_domains(article_url):
     article_title = article_url.replace("https://en.wikipedia.org/wiki/", "").replace("_", " ")
@@ -106,10 +106,10 @@ if __name__ == "__main__":
         ]
 
     connection = pymysql.connect(
-        host='tools.db.svc.wikimedia.cloud',
+        host=hostname,
         user=username,
         password=password,
-        db='s55412__cited_urls_p',
+        db=dbname,
         cursorclass=pymysql.cursors.DictCursor
     )
 

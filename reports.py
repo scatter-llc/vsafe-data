@@ -1,12 +1,12 @@
 import pymysql
-from credentials import username, password
+from credentials import hostname, dbname, username, password
 
 # Configure database connection
 db_config = {
-    'host': 'tools.db.svc.wikimedia.cloud',
+    'host': hostname,
     'user': username,
     'password': password,
-    'database': 's55412__cited_urls_p',
+    'database': dbname,
 }
 
 # Connect to the MySQL database

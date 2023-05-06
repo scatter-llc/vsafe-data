@@ -1,7 +1,7 @@
 import csv
 import re
 import pymysql
-from credentials import username, password
+from credentials import hostname, dbname, username, password
 
 def process_csv(input_file):
     output_rows = []
@@ -98,7 +98,7 @@ def prep_csv_for_sql(input_file):
 def insert_into_db(rows):
     try:
         conn = pymysql.connect(user=username, password=password,
-                               host='tools.db.svc.wikimedia.cloud', database='s55412__cited_urls_p')
+                               host=hostname, database=dbname)
         cursor = conn.cursor()
 
         for row in rows:
