@@ -89,30 +89,13 @@ def process_wikipedia_urls(article_urls, connection):
                     connection.commit()
                     domain_id = cursor.lastrowid
 
-                # Check if a row with the specified url and url_appeared_on already exists
+                # Insert a row into the urls table or update it if it already exists
                 cursor.execute(
-                    "SELECT COUNT(*) FROM urls WHERE url = %s AND url_appeared_on = %s",
-                    (url, article_url)
+                    "INSERT INTO urls (url, url_appeared_on, domain_id, last_updated) VALUES (%s, %s, %s, %s)"
+                    " ON DUPLICATE KEY UPDATE last_updated = VALUES(last_updated)",
+                    (url, article_url, domain_id, now)
                 )
-                try:
-                    count = cursor.fetchone()[0]
-                except:
-                    count = 0
-
-                # Insert a row into the urls table if it doesn't already exist
-                if count == 0:
-                    cursor.execute(
-                        "INSERT INTO urls (url, url_appeared_on, domain_id, last_updated) VALUES (%s, %s, %s, %s)",
-                        (url, article_url, domain_id, now)
-                    )
-                    connection.commit()
-                else:
-                    cursor.execute(
-                        "UPDATE urls SET last_updated = %s WHERE url = %s AND url_appeared_on = %s",
-                        (now, url, article_url)
-                    )
-                    connection.commit()
-
+                connection.commit()
 
 
 if __name__ == "__main__":
