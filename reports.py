@@ -13,15 +13,20 @@ db_config = {
 conn = pymysql.connect(**db_config)
 cursor = conn.cursor()
 
-# Function to execute query and fetch scalar result
-def execute_scalar(query):
-    cursor.execute(query)
+def execute_scalar(query, params=None):
+    cursor.execute(query, params)
     return cursor.fetchone()[0]
 
-# Function to execute query and fetch results as list of tuples
-def execute_query(query):
-    cursor.execute(query)
+def execute_query(query, params=None):
+    cursor.execute(query, params)
     return cursor.fetchall()
+
+def get_last_updated():
+    max_last_updated_query = '''
+    SELECT MAX(last_updated) as max_last_updated
+    FROM urls
+    '''
+    return execute_scalar(max_last_updated_query)
 
 def to_wikilinks(url_string):
     url_string = url_string.replace(',https://', '\thttps://')
@@ -36,66 +41,69 @@ def to_wikilinks(url_string):
     return formatted_links
 
 def generate_wikipage():
+    last_updated = get_last_updated()
+
     articles_in_scope_query = '''
-    SELECT COUNT(DISTINCT url_appeared_on) as articles_in_scope
-    FROM urls
+        SELECT COUNT(DISTINCT url_appeared_on) as articles_in_scope
+        FROM urls
+        WHERE last_updated = %s
     '''
-    articles_in_scope = execute_scalar(articles_in_scope_query)
 
     domains_linked_query = '''
-    SELECT COUNT(DISTINCT domain) as domains_linked
-    FROM domains
+        SELECT DISTINCT domain FROM urls u
+        JOIN domains d ON u.domain_id = d.id
+        WHERE u.last_updated = %s
     '''
-    domains_linked = execute_scalar(domains_linked_query)
 
     links_to_known_reliable_sources_query = '''
-    SELECT ROUND((COUNT(*) * 100.0 / (SELECT COUNT(*) FROM urls)), 1)
-           as links_to_known_reliable_sources
-    FROM urls u
-    JOIN domains d ON u.domain_id = d.id
-    WHERE d.status IN (1, 2)
+        SELECT ROUND((COUNT(*) * 100.0 / (SELECT COUNT(*) FROM urls WHERE last_updated = %s)), 1)
+               as links_to_known_reliable_sources
+        FROM urls u
+        JOIN domains d ON u.domain_id = d.id
+        WHERE d.status IN (1, 2) AND u.last_updated = %s
     '''
-    links_to_known_reliable_sources = execute_scalar(links_to_known_reliable_sources_query)
 
     links_to_unknown_domains_query = '''
-    SELECT ROUND((COUNT(*) * 100.0 / (SELECT COUNT(*) FROM urls)), 1)
-           as links_to_unknown_domains
-    FROM urls u
-    JOIN domains d ON u.domain_id = d.id
-    WHERE d.status IS NULL
+        SELECT ROUND((COUNT(*) * 100.0 / (SELECT COUNT(*) FROM urls WHERE last_updated = %s)), 1)
+               as links_to_unknown_domains
+        FROM urls u
+        JOIN domains d ON u.domain_id = d.id
+        WHERE d.status IS NULL AND u.last_updated = %s
     '''
-    links_to_unknown_domains = execute_scalar(links_to_unknown_domains_query)
 
     links_to_flagged_sources_query = '''
-    SELECT ROUND((COUNT(*) * 100.0 / (SELECT COUNT(*) FROM urls)), 1)
-           as links_to_flagged_sources
-    FROM urls u
-    JOIN domains d ON u.domain_id = d.id
-    WHERE d.status IN (3, 4, 5, 6)
+        SELECT ROUND((COUNT(*) * 100.0 / (SELECT COUNT(*) FROM urls WHERE last_updated = %s)), 1)
+               as links_to_flagged_sources
+        FROM urls u
+        JOIN domains d ON u.domain_id = d.id
+        WHERE d.status IN (3, 4, 5, 6) AND u.last_updated = %s
     '''
-    links_to_flagged_sources = execute_scalar(links_to_flagged_sources_query)
 
-    # Get flagged domains and their uses
     flagged_domains_query = '''
-    SELECT d.domain, d.status, GROUP_CONCAT(DISTINCT u.url_appeared_on) as urls_appeared_on
-    FROM urls u
-    JOIN domains d ON u.domain_id = d.id
-    WHERE d.status IN (3, 4, 5, 6)
-    GROUP BY d.domain
+        SELECT d.domain, d.status, GROUP_CONCAT(DISTINCT u.url_appeared_on) as urls_appeared_on
+        FROM urls u
+        JOIN domains d ON u.domain_id = d.id
+        WHERE d.status IN (3, 4, 5, 6) AND u.last_updated = %s
+        GROUP BY d.domain
     '''
-    flagged_domains = execute_query(flagged_domains_query)
 
-    # Get frequent domains and their use
     frequent_domains_query = '''
-    SELECT d.domain, COUNT(u.id) as url_count, GROUP_CONCAT(DISTINCT u.url_appeared_on) as urls_appeared_on
-    FROM urls u
-    JOIN domains d ON u.domain_id = d.id
-    WHERE d.status IS NULL
-    GROUP BY d.domain
-    HAVING COUNT(u.id) >= 10
-    ORDER BY url_count DESC
+        SELECT d.domain, COUNT(u.id) as url_count, GROUP_CONCAT(DISTINCT u.url_appeared_on) as urls_appeared_on
+        FROM urls u
+        JOIN domains d ON u.domain_id = d.id
+        WHERE d.status IS NULL AND u.last_updated = %s
+        GROUP BY d.domain
+        HAVING COUNT(u.id) >= 10
+        ORDER BY url_count DESC
     '''
-    frequent_domains = execute_query(frequent_domains_query)
+
+    articles_in_scope = execute_scalar(articles_in_scope_query, (last_updated,))
+    domains_linked = execute_scalar(domains_linked_query, (last_updated,))
+    links_to_known_reliable_sources = execute_scalar(links_to_known_reliable_sources_query, (last_updated,))
+    links_to_unknown_domains = execute_scalar(links_to_unknown_domains_query, (last_updated,))
+    links_to_flagged_sources = execute_scalar(links_to_flagged_sources_query, (last_updated,))
+    flagged_domains = execute_query(flagged_domains_query, (last_updated,))
+    frequent_domains = execute_query(frequent_domains_query, (last_updated,))
 
     # Close the connection to the database
     cursor.close()
