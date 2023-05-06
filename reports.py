@@ -101,7 +101,7 @@ def generate_wikipage():
     domains_linked = execute_scalar(domains_linked_query, (last_updated,))
     links_to_known_reliable_sources = execute_scalar(links_to_known_reliable_sources_query, (last_updated, last_updated))
     links_to_unknown_domains = execute_scalar(links_to_unknown_domains_query, (last_updated, last_updated))
-    links_to_flagged_sources = execute_scalar(links_to_flagged_sources_query, (last_updated, last updated))
+    links_to_flagged_sources = execute_scalar(links_to_flagged_sources_query, (last_updated, last_updated))
     flagged_domains = execute_query(flagged_domains_query, (last_updated,))
     frequent_domains = execute_query(frequent_domains_query, (last_updated,))
 
