@@ -80,11 +80,25 @@ def renumber_and_align(wikitext):
 
     return '\n'.join(lines)
 
+# Update frequent_domain_notification for each domain
+def update_frequent_domain_notification(connection, domains_and_counts):
+    cursor = connection.cursor()
+
+    for domain_id, domain, count in domains_and_counts:
+        query = f"""
+            UPDATE domains
+            SET frequent_domain_notification = 1
+            WHERE id = {domain_id};
+        """
+        cursor.execute(query)
+
+    connection.commit()
+    cursor.close()
+
 def main():
     connection = create_conn()
     if connection:
         domains_and_counts = get_domains_and_counts(connection)
-        connection.close()
 
         alerts = create_alerts(domains_and_counts)
         wikitext = load_wikitext("https://en.wikipedia.org/wiki/Wikipedia:Vaccine_safety/Alerts?action=raw")
@@ -93,6 +107,9 @@ def main():
             updated_wikitext = insert_alerts(alerts, wikitext)
             final_wikitext = renumber_and_align(updated_wikitext)
             print(final_wikitext)
+
+            update_frequent_domain_notification(connection, domains_and_counts)
+            connection.close()
 
 if __name__ == "__main__":
     main()
