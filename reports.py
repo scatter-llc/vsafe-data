@@ -123,7 +123,7 @@ def generate_wikipage():
         wiki_page += f"""
 | {domain}
 | {url_count}
-| {{hidden|1=Article links|content={to_wikilinks(urls_appeared_on)}}}
+| {{{{hidden|1=Article links|content={to_wikilinks(urls_appeared_on)}}}}}
 |-
 """
 
@@ -142,7 +142,7 @@ def generate_wikipage():
         wiki_page += f"""
 | {domain}
 | {status}
-| {{hidden|1=Article links|content={to_wikilinks(urls_appeared_on)}}}
+| {{{{hidden|1=Article links|content={to_wikilinks(urls_appeared_on)}}}}}
 |-
 """
 
