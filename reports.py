@@ -93,7 +93,7 @@ def generate_wikipage():
     WHERE d.status IS NULL
     GROUP BY d.domain
     HAVING COUNT(u.id) >= 10
-    ORDER DESC BY url_count
+    ORDER BY url_count DESC
     '''
     frequent_domains = execute_query(frequent_domains_query)
 
