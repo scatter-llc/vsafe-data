@@ -50,7 +50,7 @@ def generate_wikipage():
     '''
 
     domains_linked_query = '''
-        SELECT DISTINCT domain FROM urls u
+        SELECT COUNT(DISTINCT domain) FROM urls u
         JOIN domains d ON u.domain_id = d.id
         WHERE u.last_updated = %s
     '''
