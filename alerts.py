@@ -21,9 +21,9 @@ def get_domains_and_counts(connection):
         SELECT domains.id, domains.domain, COUNT(urls.domain_id) AS count
         FROM urls
         JOIN domains ON urls.domain_id = domains.id
-        WHERE urls.last_updated = (SELECT MAX(last_updated) FROM urls)
+        WHERE urls.last_updated = (SELECT MAX(last_updated) FROM urls) AND domains.frequent_domain_notification IS NULL
         GROUP BY urls.domain_id
-        HAVING COUNT(urls.domain_id) >= 10 AND domains.frequent_domain_notification IS NULL;
+        HAVING COUNT(urls.domain_id) >= 10;
     """
 
     cursor.execute(query)
