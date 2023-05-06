@@ -66,15 +66,19 @@ def load_wikitext(url):
 
 # Renumber notifications and align parameter names, equal signs, and values
 def renumber_and_align(wikitext):
-    for param in ['type', 'msg', 'action', 'time']:
-        matches = re.findall(fr'\| {param}\d+ *=', wikitext)
-        for i, match in enumerate(matches, 1):
-            wikitext = wikitext.replace(match, f"| {param}{i}   =")
+    lines = wikitext.split('\n')
+    counter = 1
 
-    wikitext = re.sub(r'(\| msg\d+) *=', r'\1     =', wikitext)
-    wikitext = re.sub(r'(\| action\d+) *=', r'\1  =', wikitext)
-    wikitext = re.sub(r'(\| time\d+) *=', r'\1    =', wikitext)
-    return wikitext
+    for i, line in enumerate(lines):
+        if re.match(r'\| type\d+ *=', line):
+            lines[i] = f"| type{counter}   =" + line.split('=')[1]
+            counter += 1
+
+        for param in ['msg', 'action', 'time']:
+            if re.match(fr'\| {param}\d+ *=', line):
+                lines[i] = f"| {param}{counter - 1}   =" + line.split('=')[1]
+
+    return '\n'.join(lines)
 
 def main():
     connection = create_conn()
