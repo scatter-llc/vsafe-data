@@ -1,4 +1,5 @@
 import pymysql
+import re
 import requests
 from credentials import hostname, dbname, username, password
 
@@ -23,7 +24,8 @@ def get_domains_and_counts(connection):
         JOIN domains ON urls.domain_id = domains.id
         WHERE urls.last_updated = (SELECT MAX(last_updated) FROM urls) AND domains.frequent_domain_notification IS NULL
         GROUP BY urls.domain_id
-        HAVING COUNT(urls.domain_id) >= 10;
+        HAVING COUNT(urls.domain_id) >= 10
+        ORDER BY count DESC;
     """
 
     cursor.execute(query)
@@ -62,6 +64,17 @@ def load_wikitext(url):
         print(f"Error while loading wikitext from URL: {response.status_code}")
         return None
 
+# Renumber notifications and align parameter names, equal signs, and values
+def renumber_and_align(wikitext):
+    notifications = re.findall(r'\| type\d+ *=', wikitext)
+    for i, notification in enumerate(notifications, 1):
+        wikitext = wikitext.replace(notification, f"| type{i}   =")
+
+    wikitext = re.sub(r'(\| msg\d+) *=', r'\1     =', wikitext)
+    wikitext = re.sub(r'(\| action\d+) *=', r'\1  =', wikitext)
+    wikitext = re.sub(r'(\| time\d+) *=', r'\1    =', wikitext)
+    return wikitext
+
 def main():
     connection = create_conn()
     if connection:
@@ -73,7 +86,8 @@ def main():
 
         if wikitext:
             updated_wikitext = insert_alerts(alerts, wikitext)
-            print(updated_wikitext)
+            final_wikitext = renumber_and_align(updated_wikitext)
+            print(final_wikitext)
 
 if __name__ == "__main__":
     main()
