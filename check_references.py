@@ -1,27 +1,55 @@
-import requests
 import datetime
 import pymysql
 import re
+import requests
 import time
 from tld import get_fld
 from urllib.parse import quote, urlparse
 from credentials import username, password
 
-def get_response_with_backoff(url, max_retries=5):
-    retries = 0
-    backoff = 1
+def get_external_links_and_domains(article_url):
+    article_title = article_url.replace("https://en.wikipedia.org/wiki/", "").replace("_", " ")
+    api_url = "https://en.wikipedia.org/w/api.php"
+    params = {
+        "action": "query",
+        "format": "json",
+        "prop": "extlinks",
+        "titles": article_title,
+        "ellimit": "max"
+    }
 
-    while retries < max_retries:
-        response = requests.get(url)
+    while True:
+        response = requests.get(api_url, params=params)
+        data = response.json()
 
-        if response.status_code != 500:
-            return response
+        for page in data["query"]["pages"].values():
+            for extlink in page.get("extlinks", []):
+                link = extlink["*"]
 
-        time.sleep(backoff)
-        backoff *= 2
-        retries += 1
+                # Remove web.archive.org prefix if present
+                archive_prefix = r'^https://web\.archive\.org/web/\d{14}/'
+                link = re.sub(archive_prefix, '', link)
 
-    return None
+                try:
+                    domain = get_fld(link, fail_silently=True)
+                except Exception:
+                    continue
+
+                if not domain:
+                    # If domain is an IP address with no TLD
+                    ip_pattern = re.compile(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$')
+                    domain_match = ip_pattern.match(link)
+
+                    if domain_match:
+                        domain = domain_match.group()
+
+                if domain:
+                    yield link, domain
+
+        if "continue" not in data:
+            break
+
+        params.update(data["continue"])
 
 def remove_archive_prefix(url, first_level_domain):
     pattern = r'^https://web\.archive\.org/web/(\d{14})/'
@@ -39,86 +67,53 @@ def remove_archive_prefix(url, first_level_domain):
 
 def process_wikipedia_urls(article_urls, connection):
     now = int(datetime.datetime.now().strftime("%Y%m%d%H%M%S"))
-    max_retries = 8
-
-    base_url = (
-        "https://archive.org/services/context/iari/v2/statistics/all?"
-        "url={url}&regex=test"
-    )
-
     for article_url in article_urls:
-        encoded_article_url = quote(article_url, safe='/:')
-        request_url = base_url.format(url=encoded_article_url)
-        response = get_response_with_backoff(request_url, max_retries=max_retries)
+        for url, first_level_domain in get_external_links_and_domains(article_url):
+            with connection.cursor() as cursor:
+                # Check if the First Level Domain exists in the domains table
+                cursor.execute(
+                    "SELECT id FROM domains WHERE domain = %s",
+                    (first_level_domain,)
+                )
+                try:
+                    domain_id = cursor.fetchone()["id"]
+                except:
+                    domain_id = None
 
-        if response is None:
-            print(f"Error: Unable to process {article_url}, status code: 500 after {max_retries} retries")
-            continue
-
-        if response.status_code == 200:
-            data = response.json()
-            url_details = data.get("url_details", [])
-
-            for entry in url_details:
-                url = entry.get("url")
-                first_level_domain = entry.get("first_level_domain")
-                url, first_level_domain = remove_archive_prefix(url, first_level_domain)
-
-                # Skip the row if any of the columns are missing or empty
-                if not first_level_domain or not url or not article_url:
-                    continue
-
-                with connection.cursor() as cursor:
-                    # Check if the First Level Domain exists in the domains table
+                if domain_id is None:
+                    # If not found, insert the First Level Domain into the domains table
                     cursor.execute(
-                        "SELECT id FROM domains WHERE domain = %s",
+                        "INSERT INTO domains (domain) VALUES (%s)",
                         (first_level_domain,)
                     )
-                    try:
-                        domain_id = cursor.fetchone()["id"]
-                    except:
-                        domain_id = None
+                    connection.commit()
+                    domain_id = cursor.lastrowid
 
-                    if domain_id is None:
-                        # If not found, insert the First Level Domain into the domains table
-                        cursor.execute(
-                            "INSERT INTO domains (domain) VALUES (%s)",
-                            (first_level_domain,)
-                        )
-                        connection.commit()
-                        domain_id = cursor.lastrowid
+                # Check if a row with the specified url and url_appeared_on already exists
+                cursor.execute(
+                    "SELECT COUNT(*) FROM urls WHERE url = %s AND url_appeared_on = %s",
+                    (url, article_url)
+                )
+                try:
+                    count = cursor.fetchone()[0]
+                except:
+                    count = 0
 
-                    # Check if a row with the specified url and url_appeared_on already exists
+                # Insert a row into the urls table if it doesn't already exist
+                if count == 0:
                     cursor.execute(
-                        "SELECT COUNT(*) FROM urls WHERE url = %s AND url_appeared_on = %s",
-                        (url, article_url)
+                        "INSERT INTO urls (url, url_appeared_on, domain_id, last_updated) VALUES (%s, %s, %s, %s)",
+                        (url, article_url, domain_id, now)
                     )
-                    try:
-                        count = cursor.fetchone()[0]
-                    except:
-                        count = 0
-
-                    # Insert a row into the urls table if it doesn't already exist
-                    if count == 0:
-                        cursor.execute(
-                            "INSERT INTO urls (url, url_appeared_on, domain_id, last_updated) VALUES (%s, %s, %s, %s)",
-                            (url, article_url, domain_id, now)
-                        )
-                        connection.commit()
-                    else:
-                        cursor.execute(
-                            "UPDATE urls SET last_updated = %s WHERE url = %s AND url_appeared_on = %s",
-                            (now, url, article_url)
-                        )
-                        connection.commit()
+                    connection.commit()
+                else:
+                    cursor.execute(
+                        "UPDATE urls SET last_updated = %s WHERE url = %s AND url_appeared_on = %s",
+                        (now, url, article_url)
+                    )
+                    connection.commit()
 
 
-
-        else:
-            print(
-                f"Error: Unable to process {article_url}, "
-                f"status code: {response.status_code}"
-            )
 
 if __name__ == "__main__":
     with open('vsafe-uniq.txt') as f:
