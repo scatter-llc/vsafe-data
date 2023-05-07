@@ -116,12 +116,13 @@ def get_flagged_domains_and_articles(connection):
 # Create alerts for flagged domains
 def create_flagged_domain_alerts(flagged_domains_and_articles):
     alerts = []
-
+    history_link = get_history_link(article)
+    print(history_link)
     for i, (domain, status, article) in enumerate(flagged_domains_and_articles, 1):
         article = to_wikilinks(article).replace('[[', '').replace(']]', '')
         alert = f"""| type{i}   = flagged-domain
 | msg{i}     = '''{domain}''' (marked as {{{{vsrate|{status_to_template[status]}}}}}) appears in '''[[{article}]]'''
-| action{i}  = [{get_history_link(article)} view article history]
+| action{i}  = [{history_link} view article history]
 | time{i}    = ~~~~~"""
         alerts.append(alert)
 
