@@ -1,6 +1,7 @@
 import pymysql
 import re
 import requests
+import urllib.parse
 from credentials import hostname, dbname, username, password
 
 status_to_template = {
@@ -126,9 +127,10 @@ def create_flagged_domain_alerts(flagged_domains_and_articles):
     alerts = []
 
     for i, (domain, status, article) in enumerate(flagged_domains_and_articles, 1):
+        encoded_article = urllib.parse.quote(article)
         alert = f"""| type{i}   = flagged-domain
-| msg{i}     = '''{domain}''' (marked as '''{{{{vsrate|{status_to_template[status]}}}}}''') appears in '''[[{article}]]'''
-| action{i}  = [https://en.wikipedia.org/w/index.php?title={article}&action=history view article history]
+| msg{i}     = '''{domain}''' (marked as {{{{vsrate|{status_to_template[status]}}}}}) appears in '''[[{article}]]'''
+| action{i}  = [https://en.wikipedia.org/w/index.php?title={encoded_article}&action=history view article history]
 | time{i}    = ~~~~~"""
         alerts.append(alert)
 
