@@ -5,7 +5,7 @@ from db import *
 
 # Connect to the MySQL database
 connection = create_conn()
-cursor = connection.cursor() if conn is not None else None
+cursor = connection.cursor() if connection is not None else None
 
 def get_last_updated():
     max_last_updated_query = '''
@@ -103,8 +103,8 @@ def generate_wikipage():
     # Close the connection to the database
     if cursor:
         cursor.close()
-    if conn:
-        conn.close()
+    if connection:
+        connection.close()
 
     # Create the wiki page content
     wiki_page = f"""
