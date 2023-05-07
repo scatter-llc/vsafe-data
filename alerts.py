@@ -119,10 +119,9 @@ def create_flagged_domain_alerts(flagged_domains_and_articles):
 
     for i, (domain, status, article) in enumerate(flagged_domains_and_articles, 1):
         article = to_wikilinks(article).replace('[[', '').replace(']]', '')
-        encoded_article = urllib.parse.quote(article)
         alert = f"""| type{i}   = flagged-domain
 | msg{i}     = '''{domain}''' (marked as {{{{vsrate|{status_to_template[status]}}}}}) appears in '''[[{article}]]'''
-| action{i}  = [https://en.wikipedia.org/w/index.php?title\={encoded_article}&action=history view article history]
+| action{i}  = [{get_history_link(article)} view article history]
 | time{i}    = ~~~~~"""
         alerts.append(alert)
 
