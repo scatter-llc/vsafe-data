@@ -3,17 +3,7 @@ import re
 import requests
 import urllib.parse
 from credentials import hostname, dbname, username, password
-from utility import to_wikilinks
-
-status_to_template = {
-    0: "inprogress",
-    1: "vsn",
-    2: "reliable",
-    3: "mixed",
-    4: "unreliable",
-    5: "conspiracy",
-    6: "blocked"
-}
+from utility import *
 
 # Connect to MySQL database
 def create_conn():
@@ -132,7 +122,7 @@ def create_flagged_domain_alerts(flagged_domains_and_articles):
         encoded_article = urllib.parse.quote(article)
         alert = f"""| type{i}   = flagged-domain
 | msg{i}     = '''{domain}''' (marked as {{{{vsrate|{status_to_template[status]}}}}}) appears in '''[[{article}]]'''
-| action{i}  = [https://en.wikipedia.org/w/index.php?title={encoded_article}&action=history view article history]
+| action{i}  = [https://en.wikipedia.org/w/index.php?title\={encoded_article}&action=history view article history]
 | time{i}    = ~~~~~"""
         alerts.append(alert)
 

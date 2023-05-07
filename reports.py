@@ -1,17 +1,7 @@
 import pymysql
 from credentials import hostname, dbname, username, password
 from urllib.parse import urlparse, unquote
-from utility import to_wikilinks
-
-status_to_template = {
-    0: "inprogress",
-    1: "vsn",
-    2: "reliable",
-    3: "mixed",
-    4: "unreliable",
-    5: "conspiracy",
-    6: "blocked"
-}
+from utility import *
 
 # Configure database connection
 db_config = {
