@@ -17,6 +17,34 @@ def create_conn():
         print(f"Error while connecting to MySQL: {e}")
         return None
 
+def execute_query(connection, query, fetch=True):
+    cursor = connection.cursor()
+    cursor.execute(query)
+    result = cursor.fetchall() if fetch else None
+    cursor.close()
+    return result
+
+def conditions_to_where_clause(conditions):
+    where_clause = []
+    for i in range(0, len(conditions), 2):
+        where_clause.append(f"{conditions[i]} = %s")
+    return " AND ".join(where_clause)
+
+
+def update_column(connection, table, column, value, conditions):
+    cursor = connection.cursor()
+
+    for condition_values in conditions:
+        query = f"""
+            UPDATE {table}
+            SET {column} = {value}
+            WHERE {conditions_to_where_clause(conditions)};
+        """
+        cursor.execute(query, condition_values)
+
+    connection.commit()
+    cursor.close()
+
 # Get the required domain_id and count from the database
 def get_domains_and_counts(connection):
     cursor = connection.cursor()
@@ -34,19 +62,6 @@ def get_domains_and_counts(connection):
     result = cursor.fetchall()
     cursor.close()
     return result
-
-# Format the alerts as per the required format
-def create_alerts(domains_and_counts):
-    alerts = []
-
-    for i, (domain_id, domain, count) in enumerate(domains_and_counts, 1):
-        alert = f"""| type{i}   = frequent-domain
-| msg{i}     = '''{domain}''' appears {count} times on articles
-| action{i}  = [[Wikipedia:Vaccine safety/Reports#Frequent domain use|view report]]
-| time{i}    = ~~~~~"""
-        alerts.append(alert)
-
-    return alerts
 
 # Insert the new alerts in the existing wikitext
 def insert_alerts(alerts, wikitext):
@@ -113,19 +128,36 @@ def get_flagged_domains_and_articles(connection):
     cursor.close()
     return result
 
-# Create alerts for flagged domains
-def create_flagged_domain_alerts(flagged_domains_and_articles):
+def format_alert_string(i, type_line, msg_line, action_line, time_line):
+    return f"""| type{i}   = {type_line}
+| msg{i}     = {msg_line}
+| action{i}  = {action_line}
+| time{i}    = {time_line}"""
+
+def create_alerts(alert_type, data):
     alerts = []
-    for i, (domain, status, article) in enumerate(flagged_domains_and_articles, 1):
-        article = to_wikilinks(article).replace('[[', '').replace(']]', '')
-        history_link = get_history_link(article)
-        alert = f"""| type{i}   = flagged-domain
-| msg{i}     = '''{domain}''' (marked as {{{{vsrate|{status_to_template[status]}}}}}) appears in '''[[{article}]]'''
-| action{i}  = [{history_link} view article history]
-| time{i}    = ~~~~~"""
+
+    for i, item in enumerate(data, 1):
+        if alert_type == "frequent-domain":
+            domain_id, domain, count = item
+            type_line = alert_type
+            msg_line = f"'''{domain}''' appears {count} times on articles"
+            action_line = "[[Wikipedia:Vaccine safety/Reports#Frequent domain use|view report]]"
+
+        elif alert_type == "flagged-domain":
+            domain, status, article = item
+            article = to_wikilinks(article).replace('[[', '').replace(']]', '')
+            history_link = get_history_link(article)
+            type_line = alert_type
+            msg_line = f"'''{domain}''' (marked as {{{{vsrate|{status_to_template[status]}}}}}) appears in '''[[{article}]]'''"
+            action_line = f"[{history_link} view article history]"
+
+        time_line = "~~~~~"
+        alert = format_alert_string(i, type_line, msg_line, action_line, time_line)
         alerts.append(alert)
 
     return alerts
+
 
 # Update urls.appeared_on_article_notification for each url,url_appeared_on pairing
 def update_appeared_on_article_notification(connection, flagged_domains_and_articles):
@@ -149,8 +181,8 @@ def main():
         domains_and_counts = get_domains_and_counts(connection)
         flagged_domains_and_articles = get_flagged_domains_and_articles(connection)
 
-        frequent_domain_alerts = create_alerts(domains_and_counts)
-        flagged_domain_alerts = create_flagged_domain_alerts(flagged_domains_and_articles)
+        frequent_domain_alerts = create_alerts("frequent-domain", domains_and_counts)
+        flagged_domain_alerts = create_alerts("flagged-domain", flagged_domains_and_articles)
 
         alerts = frequent_domain_alerts + flagged_domain_alerts
 
@@ -161,8 +193,22 @@ def main():
             final_wikitext = renumber_and_align(updated_wikitext)
             print(final_wikitext)
 
-            update_frequent_domain_notification(connection, domains_and_counts)
-            update_appeared_on_article_notification(connection, flagged_domains_and_articles)
+            update_column(
+                connection,
+                "domains",
+                "frequent_domain_notification",
+                1,
+                [("id", domain_id) for domain_id, _, _ in domains_and_counts]
+            )
+
+            update_column(
+                connection,
+                "urls",
+                "appeared_on_article_notification",
+                1,
+                [("domain_id", domain, "url_appeared_on", article) for domain, _, article in flagged_domains_and_articles]
+            )
+
             connection.close()
 
 if __name__ == "__main__":
