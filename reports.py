@@ -1,5 +1,6 @@
 import pymysql
 from credentials import hostname, dbname, username, password
+from urllib.parse import urlparse, unquote
 
 # Configure database connection
 db_config = {
@@ -34,9 +35,12 @@ def to_wikilinks(url_string):
     wikilinks = []
     for url in urls:
         url = url.strip()
-        title = url.split('/')[-1].replace('_', ' ')
-        wikilink = f"[[{title}]]"
-        wikilinks.append(wikilink)
+        parsed_url = urlparse(url)
+        path = parsed_url.path
+        if path.startswith('/wiki/'):
+            title = unquote(path[6:]).replace('_', ' ')
+            wikilink = f"[[{title}]]"
+            wikilinks.append(wikilink)
     formatted_links = ', '.join(wikilinks)
     return formatted_links
 
