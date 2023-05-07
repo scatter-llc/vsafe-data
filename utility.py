@@ -26,5 +26,5 @@ def to_wikilinks(url_string):
     return formatted_links
 
 def get_history_link(article_title):
-    encoded = urlparse(article_title)
+    encoded = urlparse.quote(article_title)
     return "https://en.wikipedia.org/w/index.php?title=" + encoded + "&action=history"
