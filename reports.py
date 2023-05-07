@@ -2,6 +2,16 @@ import pymysql
 from credentials import hostname, dbname, username, password
 from urllib.parse import urlparse, unquote
 
+status_to_template = {
+    "0": "inprogress",
+    "1": "vsn",
+    "2": "reliable",
+    "3": "mixed",
+    "4": "unreliable",
+    "5": "conspiracy",
+    "6": "blocked"
+}
+
 # Configure database connection
 db_config = {
     'host': hostname,
@@ -153,7 +163,7 @@ def generate_wikipage():
     for domain, status, urls_appeared_on in flagged_domains:
         wiki_page += f"""
 | {domain}
-| {status}
+| {{{{vsrate|{status_to_template[status]}}}}}
 | {{{{hidden|1=Article links|content={to_wikilinks(urls_appeared_on)}}}}}
 |-
 """
