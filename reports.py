@@ -12,7 +12,7 @@ def get_last_updated():
     SELECT MAX(last_updated) as max_last_updated
     FROM urls
     '''
-    return execute_scalar(max_last_updated_query)
+    return execute_scalar(connection, max_last_updated_query)
 
 def generate_wikipage():
     last_updated = get_last_updated()
