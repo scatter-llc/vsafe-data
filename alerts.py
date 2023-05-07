@@ -3,6 +3,16 @@ import re
 import requests
 from credentials import hostname, dbname, username, password
 
+status_to_template = {
+    0: "inprogress",
+    1: "vsn",
+    2: "reliable",
+    3: "mixed",
+    4: "unreliable",
+    5: "conspiracy",
+    6: "blocked"
+}
+
 # Connect to MySQL database
 def create_conn():
     try:
@@ -95,12 +105,46 @@ def update_frequent_domain_notification(connection, domains_and_counts):
     connection.commit()
     cursor.close()
 
+# Fetch flagged domains and articles from the database
+def get_flagged_domains_and_articles(connection):
+    cursor = connection.cursor()
+    query = """
+        SELECT domains.domain, domains.status, urls.url_appeared_on
+        FROM urls
+        JOIN domains ON urls.domain_id = domains.id
+        WHERE urls.appeared_on_article_notification IS NULL
+            AND domains.status IN (3, 4, 5, 6);
+    """
+
+    cursor.execute(query)
+    result = cursor.fetchall()
+    cursor.close()
+    return result
+
+# Create alerts for flagged domains
+def create_flagged_domain_alerts(flagged_domains_and_articles):
+    alerts = []
+
+    for i, (domain, status, article) in enumerate(flagged_domains_and_articles, 1):
+        alert = f"""| type{i}   = flagged-domain
+| msg{i}     = '''{domain}''' (marked as '''{{{{vsrate|{status_to_template[status]}}}}}''') appears in '''[[{article}]]'''
+| action{i}  = [https://en.wikipedia.org/w/index.php?title={article}&action=history view article history]
+| time{i}    = ~~~~~"""
+        alerts.append(alert)
+
+    return alerts
+
 def main():
     connection = create_conn()
     if connection:
         domains_and_counts = get_domains_and_counts(connection)
+        flagged_domains_and_articles = get_flagged_domains_and_articles(connection)
 
-        alerts = create_alerts(domains_and_counts)
+        frequent_domain_alerts = create_alerts(domains_and_counts)
+        flagged_domain_alerts = create_flagged_domain_alerts(flagged_domains_and_articles)
+
+        alerts = frequent_domain_alerts + flagged_domain_alerts
+
         wikitext = load_wikitext("https://en.wikipedia.org/wiki/Wikipedia:Vaccine_safety/Alerts?action=raw")
 
         if wikitext:
@@ -109,6 +153,7 @@ def main():
             print(final_wikitext)
 
             update_frequent_domain_notification(connection, domains_and_counts)
+            # Update urls.appeared_on_article_notification here (if needed)
             connection.close()
 
 if __name__ == "__main__":
