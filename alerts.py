@@ -2,48 +2,8 @@ import pymysql
 import re
 import requests
 import urllib.parse
-from credentials import hostname, dbname, username, password
 from utility import *
-
-# Connect to MySQL database
-def create_conn():
-    try:
-        connection = pymysql.connect(user=username,
-                                     password=password,
-                                     host=hostname,
-                                     database=dbname)
-        return connection
-    except pymysql.Error as e:
-        print(f"Error while connecting to MySQL: {e}")
-        return None
-
-def execute_query(connection, query, fetch=True):
-    cursor = connection.cursor()
-    cursor.execute(query)
-    result = cursor.fetchall() if fetch else None
-    cursor.close()
-    return result
-
-def conditions_to_where_clause(conditions):
-    where_clause = []
-    for i in range(0, len(conditions), 2):
-        where_clause.append(f"{conditions[i]} = %s")
-    return " AND ".join(where_clause)
-
-
-def update_column(connection, table, column, value, conditions):
-    cursor = connection.cursor()
-
-    for condition_values in conditions:
-        query = f"""
-            UPDATE {table}
-            SET {column} = {value}
-            WHERE {conditions_to_where_clause(conditions)};
-        """
-        cursor.execute(query, condition_values)
-
-    connection.commit()
-    cursor.close()
+from db import *
 
 # Get the required domain_id and count from the database
 def get_domains_and_counts(connection):
@@ -97,21 +57,6 @@ def renumber_and_align(wikitext):
 
     return '\n'.join(lines)
 
-# Update frequent_domain_notification for each domain
-def update_frequent_domain_notification(connection, domains_and_counts):
-    cursor = connection.cursor()
-
-    for domain_id, domain, count in domains_and_counts:
-        query = f"""
-            UPDATE domains
-            SET frequent_domain_notification = 1
-            WHERE id = {domain_id};
-        """
-        cursor.execute(query)
-
-    connection.commit()
-    cursor.close()
-
 # Fetch flagged domains and articles from the database
 def get_flagged_domains_and_articles(connection):
     cursor = connection.cursor()
@@ -157,23 +102,6 @@ def create_alerts(alert_type, data):
         alerts.append(alert)
 
     return alerts
-
-
-# Update urls.appeared_on_article_notification for each url,url_appeared_on pairing
-def update_appeared_on_article_notification(connection, flagged_domains_and_articles):
-    cursor = connection.cursor()
-
-    for domain, status, article in flagged_domains_and_articles:
-        query = f"""
-            UPDATE urls
-            SET appeared_on_article_notification = 1
-            WHERE domain_id = (SELECT id FROM domains WHERE domain = %s)
-                AND url_appeared_on = %s;
-        """
-        cursor.execute(query, (domain, article))
-
-    connection.commit()
-    cursor.close()
 
 def main():
     connection = create_conn()

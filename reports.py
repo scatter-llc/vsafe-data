@@ -1,27 +1,11 @@
 import pymysql
-from credentials import hostname, dbname, username, password
 from urllib.parse import urlparse, unquote
 from utility import *
-
-# Configure database connection
-db_config = {
-    'host': hostname,
-    'user': username,
-    'password': password,
-    'database': dbname,
-}
+from db import *
 
 # Connect to the MySQL database
-conn = pymysql.connect(**db_config)
-cursor = conn.cursor()
-
-def execute_scalar(query, params=None):
-    cursor.execute(query, params)
-    return cursor.fetchone()[0]
-
-def execute_query(query, params=None):
-    cursor.execute(query, params)
-    return cursor.fetchall()
+connection = create_conn()
+cursor = connection.cursor() if conn is not None else None
 
 def get_last_updated():
     max_last_updated_query = '''
@@ -87,17 +71,20 @@ def generate_wikipage():
         ORDER BY url_count DESC
     '''
 
-    articles_in_scope = execute_scalar(articles_in_scope_query, (last_updated,))
-    domains_linked = execute_scalar(domains_linked_query, (last_updated,))
-    links_to_known_reliable_sources = execute_scalar(links_to_known_reliable_sources_query, (last_updated, last_updated))
-    links_to_unknown_domains = execute_scalar(links_to_unknown_domains_query, (last_updated, last_updated))
-    links_to_flagged_sources = execute_scalar(links_to_flagged_sources_query, (last_updated, last_updated))
-    flagged_domains = execute_query(flagged_domains_query, (last_updated,))
-    frequent_domains = execute_query(frequent_domains_query, (last_updated,))
+    articles_in_scope = execute_scalar(conn, articles_in_scope_query, params=(last_updated,))
+    domains_linked = execute_scalar(conn, domains_linked_query, params=(last_updated,))
+    links_to_known_reliable_sources = execute_scalar(conn, links_to_known_reliable_sources_query, params=(last_updated, last_updated))
+    links_to_unknown_domains = execute_scalar(conn, links_to_unknown_domains_query, params=(last_updated, last_updated))
+    links_to_flagged_sources = execute_scalar(conn, links_to_flagged_sources_query, params=(last_updated, last_updated))
+    flagged_domains = execute_query(connection, flagged_domains_query, params=(last_updated,))
+    frequent_domains = execute_query(connection, frequent_domains_query, params=(last_updated,))
+
 
     # Close the connection to the database
-    cursor.close()
-    conn.close()
+    if cursor:
+        cursor.close()
+    if conn:
+        conn.close()
 
     # Create the wiki page content
     wiki_page = f"""
