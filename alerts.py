@@ -127,6 +127,22 @@ def create_flagged_domain_alerts(flagged_domains_and_articles):
 
     return alerts
 
+# Update urls.appeared_on_article_notification for each url,url_appeared_on pairing
+def update_appeared_on_article_notification(connection, flagged_domains_and_articles):
+    cursor = connection.cursor()
+
+    for domain, status, article in flagged_domains_and_articles:
+        query = f"""
+            UPDATE urls
+            SET appeared_on_article_notification = 1
+            WHERE domain_id = (SELECT id FROM domains WHERE domain = %s)
+                AND url_appeared_on = %s;
+        """
+        cursor.execute(query, (domain, article))
+
+    connection.commit()
+    cursor.close()
+
 def main():
     connection = create_conn()
     if connection:
@@ -146,7 +162,7 @@ def main():
             print(final_wikitext)
 
             update_frequent_domain_notification(connection, domains_and_counts)
-            # Update urls.appeared_on_article_notification here (if needed)
+            update_appeared_on_article_notification(connection, flagged_domains_and_articles)
             connection.close()
 
 if __name__ == "__main__":
