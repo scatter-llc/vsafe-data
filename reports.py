@@ -3,13 +3,13 @@ from credentials import hostname, dbname, username, password
 from urllib.parse import urlparse, unquote
 
 status_to_template = {
-    "0": "inprogress",
-    "1": "vsn",
-    "2": "reliable",
-    "3": "mixed",
-    "4": "unreliable",
-    "5": "conspiracy",
-    "6": "blocked"
+    0: "inprogress",
+    1: "vsn",
+    2: "reliable",
+    3: "mixed",
+    4: "unreliable",
+    5: "conspiracy",
+    6: "blocked"
 }
 
 # Configure database connection
