@@ -71,13 +71,33 @@ def generate_wikipage():
         ORDER BY url_count DESC
     '''
 
-    articles_in_scope = execute_scalar(conn, articles_in_scope_query, params=(last_updated,))
-    domains_linked = execute_scalar(conn, domains_linked_query, params=(last_updated,))
-    links_to_known_reliable_sources = execute_scalar(conn, links_to_known_reliable_sources_query, params=(last_updated, last_updated))
-    links_to_unknown_domains = execute_scalar(conn, links_to_unknown_domains_query, params=(last_updated, last_updated))
-    links_to_flagged_sources = execute_scalar(conn, links_to_flagged_sources_query, params=(last_updated, last_updated))
-    flagged_domains = execute_query(connection, flagged_domains_query, params=(last_updated,))
-    frequent_domains = execute_query(connection, frequent_domains_query, params=(last_updated,))
+    articles_in_scope = execute_scalar(
+        connection, articles_in_scope_query, params=(last_updated,)
+    )
+    domains_linked = execute_scalar(
+        connection, domains_linked_query, params=(last_updated,)
+    )
+    links_to_known_reliable_sources = execute_scalar(
+        connection,
+        links_to_known_reliable_sources_query,
+        params=(last_updated, last_updated)
+    )
+    links_to_unknown_domains = execute_scalar(
+        connection,
+        links_to_unknown_domains_query,
+        params=(last_updated, last_updated)
+    )
+    links_to_flagged_sources = execute_scalar(
+        connection,
+        links_to_flagged_sources_query,
+        params=(last_updated, last_updated)
+    )
+    flagged_domains = execute_query(
+        connection, flagged_domains_query, params=(last_updated,)
+    )
+    frequent_domains = execute_query(
+        connection, frequent_domains_query, params=(last_updated,)
+    )
 
 
     # Close the connection to the database
