@@ -73,12 +73,12 @@ def renumber_and_align(wikitext):
 
     for i, line in enumerate(lines):
         if re.match(r'\| type\d+ *=', line):
-            lines[i] = f"| type{counter}   =" + line.split('=')[1]
+            lines[i] = f"| type{counter}   =" + line.split('=', 1)[1]
             counter += 1
 
         for param in ['msg', 'action', 'time']:
             if re.match(fr'\| {param}\d+ *=', line):
-                lines[i] = f"| {param}{counter - 1}   =" + line.split('=')[1]
+                lines[i] = f"| {param}{counter - 1}   =" + line.split('=', 1)[1]
 
     return '\n'.join(lines)
 
@@ -119,7 +119,6 @@ def create_flagged_domain_alerts(flagged_domains_and_articles):
     for i, (domain, status, article) in enumerate(flagged_domains_and_articles, 1):
         article = to_wikilinks(article).replace('[[', '').replace(']]', '')
         history_link = get_history_link(article)
-        print(history_link)
         alert = f"""| type{i}   = flagged-domain
 | msg{i}     = '''{domain}''' (marked as {{{{vsrate|{status_to_template[status]}}}}}) appears in '''[[{article}]]'''
 | action{i}  = [{history_link} view article history]
