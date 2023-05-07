@@ -3,6 +3,7 @@ import re
 import requests
 import urllib.parse
 from credentials import hostname, dbname, username, password
+from utility import to_wikilinks
 
 status_to_template = {
     0: "inprogress",
@@ -127,6 +128,7 @@ def create_flagged_domain_alerts(flagged_domains_and_articles):
     alerts = []
 
     for i, (domain, status, article) in enumerate(flagged_domains_and_articles, 1):
+        article = to_wikilinks(article).replace('[[', '').replace(']]', '')
         encoded_article = urllib.parse.quote(article)
         alert = f"""| type{i}   = flagged-domain
 | msg{i}     = '''{domain}''' (marked as {{{{vsrate|{status_to_template[status]}}}}}) appears in '''[[{article}]]'''

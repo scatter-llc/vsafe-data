@@ -1,6 +1,7 @@
 import pymysql
 from credentials import hostname, dbname, username, password
 from urllib.parse import urlparse, unquote
+from utility import to_wikilinks
 
 status_to_template = {
     0: "inprogress",
@@ -38,21 +39,6 @@ def get_last_updated():
     FROM urls
     '''
     return execute_scalar(max_last_updated_query)
-
-def to_wikilinks(url_string):
-    url_string = url_string.replace(',https://', '\thttps://')
-    urls = url_string.split('\t')
-    wikilinks = []
-    for url in urls:
-        url = url.strip()
-        parsed_url = urlparse(url)
-        path = parsed_url.path
-        if path.startswith('/wiki/'):
-            title = unquote(path[6:]).replace('_', ' ')
-            wikilink = f"[[{title}]]"
-            wikilinks.append(wikilink)
-    formatted_links = ', '.join(wikilinks)
-    return formatted_links
 
 def generate_wikipage():
     last_updated = get_last_updated()
