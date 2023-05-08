@@ -57,7 +57,7 @@ for row in cursor:
 
         if perennial_source == 1:
             qualifiers_list = [
-                wdi_core.WDQualifier(
+                wdi_core.WDItemID(
                     prop_nr=prop_nr, value=value, is_qualifier=True
                 ) for prop_nr, value in qualifiers.items()
             ]
