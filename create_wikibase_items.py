@@ -66,6 +66,9 @@ for row in cursor:
             mediawiki_api_url="https://domains.wikibase.cloud/w/api.php",
             sparql_endpoint_url="https://domains.wikibase.cloud/query/sparql"
         )
+        new_item.set_label(domain, lang="en")  # Set label to P1 value
+        new_item.set_description("domain", lang="en")  # Set description to "domain"
+
         # Set up WikidataIntegrator login
         login_instance = wdi_login.WDLogin(
             user=wikibase_username,
