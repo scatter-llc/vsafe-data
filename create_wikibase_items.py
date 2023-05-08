@@ -27,15 +27,6 @@ existing_domains = {
 connection = create_conn()
 cursor = connection.cursor()
 
-# Set up WikidataIntegrator login
-login_instance = wdi_login.WDLogin(
-    user=wikibase_username,
-    pwd=wikibase_password,
-    mediawiki_api_url="https://domains.wikibase.cloud/w/api.php",
-    mediawiki_index_url="https://domain.wikibase.cloud/w/index.php",
-    user_agent="Vsafe-Data/1.0 (james@scatter.red)"
-)
-
 # Query MySQL table
 query = "SELECT domain, status, perennial_source FROM domains"
 cursor.execute(query)
@@ -72,6 +63,14 @@ for row in cursor:
         # Save new Wikibase item and print ID
         new_item = wdi_core.WDItemEngine(
             data=item_data
+        )
+        # Set up WikidataIntegrator login
+        login_instance = wdi_login.WDLogin(
+            user=wikibase_username,
+            pwd=wikibase_password,
+            mediawiki_api_url="https://domains.wikibase.cloud/w/api.php",
+            mediawiki_index_url="https://domain.wikibase.cloud/w/index.php",
+            user_agent="Vsafe-Data/1.0 (james@scatter.red)"
         )
         new_item.write(login_instance)
         print(f"Created new Wikibase item with ID: {new_item.wd_item_id}")
