@@ -24,7 +24,7 @@ existing_domains = {
 }
 
 # Set up MySQL connection
-connection = get_conn()
+connection = create_conn()
 cursor = connection.cursor()
 
 # Set up WikidataIntegrator login
