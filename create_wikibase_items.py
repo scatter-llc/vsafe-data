@@ -29,8 +29,8 @@ cursor = connection.cursor()
 
 # Set up WikidataIntegrator login
 login_instance = wdi_login.WDLogin(
-    wikibase_username,
-    wikibase_password,
+    user=wikibase_username,
+    pwd=wikibase_password,
     mediawiki_api_url="https://domains.wikibase.cloud/w/api.php"
 )
 
@@ -56,17 +56,20 @@ for row in cursor:
             qualifiers["P8"] = status_mapping.get(status)
 
         if perennial_source == 1:
+            qualifiers_list = [
+                wdi_core.WDItemID(
+                    prop_nr=prop_nr, value=value, is_qualifier=True
+                ) for prop_nr, value in qualifiers.items()
+            ]
             item_data.append(wdi_core.WDUrl(
                 value="https://en.wikipedia.org/wiki/Wikipedia:Vaccine_safety/Perennial_sources",
                 prop_nr="P7",
-                qualifiers=qualifiers
+                qualifiers=qualifiers_list
             ))
 
         # Save new Wikibase item and print ID
         new_item = wdi_core.WDItemEngine(
-            data=item_data,
-            mediawiki_api_url="https://domains.wikibase.cloud/w/api.php",
-            sparql_endpoint_url=sparql_endpoint
+            data=item_data
         )
         new_item.write(login_instance)
         print(f"Created new Wikibase item with ID: {new_item.wd_item_id}")
