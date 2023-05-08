@@ -67,8 +67,7 @@ for row in cursor:
         new_item = wdi_core.WDItemEngine(
             data=item_data,
             mediawiki_api_url="https://domains.wikibase.cloud/w/api.php",
-            sparql_endpoint_url=sparql_endpoint,
-            wd_login=login_instance
+            sparql_endpoint_url=sparql_endpoint
         )
         new_item.write(login_instance)
         print(f"Created new Wikibase item with ID: {new_item.wd_item_id}")
