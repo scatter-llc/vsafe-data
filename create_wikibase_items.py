@@ -57,9 +57,11 @@ for row in cursor:
 
         if perennial_source == 1:
             item_data["P7"] = wdi_core.WDUrl(
-                "https://en.wikipedia.org/wiki/Wikipedia:Vaccine_safety/Perennial_sources",
+                value="https://en.wikipedia.org/wiki/Wikipedia:Vaccine_safety/Perennial_sources",
+                prop_nr="P7",
                 qualifiers=qualifiers
             )
+
 
         # Save new Wikibase item and print ID
         new_item = wdi_core.WDItemEngine(
