@@ -31,7 +31,8 @@ cursor = connection.cursor()
 login_instance = wdi_login.WDLogin(
     user=wikibase_username,
     pwd=wikibase_password,
-    mediawiki_api_url="https://domains.wikibase.cloud/w/api.php"
+    mediawiki_api_url="https://domains.wikibase.cloud/w/api.php",
+    user_agent='Vsafe-Data/1.0 (james@scatter.red)'
 )
 
 # Query MySQL table
