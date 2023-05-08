@@ -48,12 +48,13 @@ for row in cursor:
     if domain not in existing_domains:
         # Create new Wikibase item
         item_data = {
-            "P1": domain,
+            "P1": wdi_core.WDString(value=domain, prop_nr="P1"),
         }
 
         qualifiers = {}
         if status is not None and status > 0:
-            qualifiers["P8"] = status_mapping.get(status)
+            qualifiers["P8"] = wdi_core.WDItemID(value=status_mapping.get(status), prop_nr="P8")
+
 
         if perennial_source == 1:
             item_data["P7"] = wdi_core.WDUrl(
