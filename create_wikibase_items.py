@@ -62,7 +62,9 @@ for row in cursor:
 
         # Save new Wikibase item and print ID
         new_item = wdi_core.WDItemEngine(
-            data=item_data
+            data=item_data,
+            mediawiki_api_url="https://domains.wikibase.cloud/w/api.php",
+            sparql_endpoint_url="https://domains.wikibase.cloud/query/sparql"
         )
         # Set up WikidataIntegrator login
         login_instance = wdi_login.WDLogin(
