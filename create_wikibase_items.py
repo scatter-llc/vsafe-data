@@ -47,22 +47,20 @@ for row in cursor:
     # Check if domain is already in Wikibase
     if domain not in existing_domains:
         # Create new Wikibase item
-        item_data = {
-            "P1": wdi_core.WDString(value=domain, prop_nr="P1"),
-        }
+        item_data = [
+            wdi_core.WDString(value=domain, prop_nr="P1"),
+        ]
 
         qualifiers = {}
         if status is not None and status > 0:
             qualifiers["P8"] = wdi_core.WDItemID(value=status_mapping.get(status), prop_nr="P8")
 
-
         if perennial_source == 1:
-            item_data["P7"] = wdi_core.WDUrl(
+            item_data.append(wdi_core.WDUrl(
                 value="https://en.wikipedia.org/wiki/Wikipedia:Vaccine_safety/Perennial_sources",
                 prop_nr="P7",
                 qualifiers=qualifiers
-            )
-
+            ))
 
         # Save new Wikibase item and print ID
         new_item = wdi_core.WDItemEngine(
