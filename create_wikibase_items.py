@@ -56,10 +56,15 @@ for row in cursor:
             qualifiers["P8"] = wdi_core.WDItemID(value=status_mapping.get(status), prop_nr="P8")
 
         if perennial_source == 1:
+            qualifiers_list = [
+                wdi_core.WDQualifier(
+                    prop_nr=prop_nr, value=value, is_qualifier=True
+                ) for prop_nr, value in qualifiers.items()
+            ]
             item_data.append(wdi_core.WDUrl(
                 value="https://en.wikipedia.org/wiki/Wikipedia:Vaccine_safety/Perennial_sources",
                 prop_nr="P7",
-                qualifiers=qualifiers
+                qualifiers=qualifiers_list
             ))
 
         # Save new Wikibase item and print ID
