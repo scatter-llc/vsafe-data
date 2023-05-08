@@ -77,8 +77,13 @@ for row in cursor:
             mediawiki_index_url="https://domain.wikibase.cloud/w/index.php",
             user_agent="Vsafe-Data/1.0 (james@scatter.red)"
         )
-        new_item.write(login_instance)
-        print(f"Created new Wikibase item with ID: {new_item.wd_item_id}")
+        try:
+            new_item.write(login_instance)
+            print(f"Created new Wikibase item with ID: {new_item.wd_item_id}")
+        # If a non-unique label and description pair occurs in this context, it
+        # means the item has already been created and we can safely skip over it.
+        except wdi_core.NonUniqueLabelDescriptionPairError:
+            continue
 
 # Close MySQL connection
 cursor.close()
