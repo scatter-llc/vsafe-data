@@ -120,20 +120,20 @@ def get_alerts_page():
             updated_wikitext = insert_alerts(alerts, wikitext)
             final_wikitext = renumber_and_align(updated_wikitext)
 
-            update_column(
+            update_column_with_conditions(
                 connection,
                 "domains",
                 "frequent_domain_notification",
                 1,
-                [("id", domain_id) for domain_id, _, _ in domains_and_counts]
+                [(("id", domain_id),) for domain_id, _, _ in domains_and_counts]
             )
 
-            update_column(
+            update_column_with_conditions(
                 connection,
                 "urls",
                 "appeared_on_article_notification",
                 1,
-                [("domain_id", domain, "url_appeared_on", article) for domain, _, article in flagged_domains_and_articles]
+                [(("domain_id", domain), ("url_appeared_on", article)) for domain, _, article in flagged_domains_and_articles]
             )
 
             connection.close()
