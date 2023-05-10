@@ -38,11 +38,11 @@ def update_column(connection, table, column, value, conditions):
 
     for condition_values in conditions:
         where_clause = conditions_to_where_clause(conditions)
-        query = f"""
+        query = """
             UPDATE {table}
             SET {column} = {value}
             WHERE {where_clause};
-        """
+        """.format(table=table, column=column, value=value, where_clause=where_clause)
         cursor.execute(query, condition_values)
 
     connection.commit()
