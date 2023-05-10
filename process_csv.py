@@ -6,6 +6,7 @@ prepares the data for SQL insertion, and inserts the data into a MySQL database.
 import csv
 import re
 import pymysql
+import sys
 from credentials import hostname, dbname, username, password
 
 def process_csv(input_file):
@@ -157,6 +158,11 @@ def insert_into_db(rows):
         if conn.open:
             conn.close()
 
-input_file = '2023-04-12-run01-derived.csv'
-output_rows = prep_csv_for_sql(input_file)
-insert_into_db(output_rows)
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("Usage: python process_csv.py <input_csv_file>")
+        sys.exit(1)
+
+    input_file = sys.argv[1]
+    output_rows = prep_csv_for_sql(input_file)
+    insert_into_db(output_rows)
