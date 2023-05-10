@@ -8,15 +8,19 @@ This repository includes:
 
 2. `cd vsafe-data`
 
-3. `python3 -m venv venv`
+3. `git submodule init`
 
-4. `source venv/bin/activate`
+4. `git submodule update`
 
-5. `pip3 install -r requirements.txt`
+5. `python3 -m venv venv`
 
-6. Create a MySQL (or MariaDB) database if you have not yet. (Schema forthcoming)
+6. `source venv/bin/activate`
 
-7. Set up `credentials.py` (for database and Domains Wikibase access) like this:
+7. `pip3 install -r requirements.txt`
+
+8. Create a MySQL (or MariaDB) database if you have not yet. (Schema forthcoming)
+
+9. Set up `credentials.py` (for database and Domains Wikibase access) like this:
 
 ```
 username = 'your_mysql_username'
@@ -27,7 +31,7 @@ wikibase_username = 'your_username_on_domains_wikibase'
 wikibase_password = 'your_password_on_domains_wikibase'
 ```
 
-8. Set up `user-config.py` (for pywikibot, for updating Wikipedia) like this:
+10. Set up `user-config.py` (for pywikibot, for updating Wikipedia) like this:
 
 ```
 mylang = 'en'
@@ -36,7 +40,7 @@ usernames['wikipedia']['en'] = 'your_username'
 password_file = 'pywikibot-password.txt'
 ```
 
-9. Set up `pywikibot-password.txt` like this:
+11. Set up `pywikibot-password.txt` like this:
 
 ```
 ('your_wikipedia_username', 'your_wikipedia_password')
