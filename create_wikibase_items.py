@@ -1,3 +1,7 @@
+"""
+Creates new items on the Domains Wikibase based on new domains
+from the check-references workflow
+"""
 import requests
 from wikidataintegrator import wdi_core, wdi_login
 from credentials import wikibase_username, wikibase_password

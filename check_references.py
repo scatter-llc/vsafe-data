@@ -9,6 +9,16 @@ from credentials import hostname, dbname, username, password
 from pageset import get_list
 
 def get_external_links_and_domains(article_url):
+    """
+    Retrieves external links and their corresponding domains from a given
+    Wikipedia article.
+
+    Args:
+        article_url (str): The URL of the Wikipedia article.
+
+    Yields:
+        tuple: A tuple containing the external link and its domain.
+    """
     article_title = article_url.replace("https://en.wikipedia.org/wiki/", "").replace("_", " ")
     api_url = "https://en.wikipedia.org/w/api.php"
     params = {
@@ -53,6 +63,17 @@ def get_external_links_and_domains(article_url):
         params.update(data["continue"])
 
 def remove_archive_prefix(url, first_level_domain):
+    """
+    Removes the archive.org prefix from a URL and returns the modified URL and
+    its first-level domain.
+
+    Args:
+        url (str): The original URL with or without the archive.org prefix.
+        first_level_domain (str): The first-level domain of the URL.
+
+    Returns:
+        tuple: A tuple containing the modified URL and its first-level domain.
+    """
     pattern = r'^https://web\.archive\.org/web/(\d{14})/'
     match = re.match(pattern, url)
 
@@ -67,6 +88,14 @@ def remove_archive_prefix(url, first_level_domain):
         return url, first_level_domain
 
 def process_wikipedia_urls(article_urls, connection):
+    """
+    Processes a list of Wikipedia article URLs, extracting external links and
+    their domains, then storing them in a MySQL database.
+
+    Args:
+        article_urls (list): A list of Wikipedia article URLs.
+        connection (pymysql.connections.Connection): A pymysql connection object.
+    """
     now = int(datetime.datetime.now().strftime("%Y%m%d%H%M%S"))
     for article_url in article_urls:
         for url, first_level_domain in get_external_links_and_domains(article_url):
@@ -99,6 +128,10 @@ def process_wikipedia_urls(article_urls, connection):
                 connection.commit()
 
 def go():
+    """
+    Fetches relevant vaccine-safety articles, processes their external links
+    and stores them in a MySQL database.
+    """
     article_urls = get_list.get_vsafe_set()
 
     connection = pymysql.connect(

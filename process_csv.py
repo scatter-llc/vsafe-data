@@ -1,9 +1,23 @@
+"""
+This script processes a CSV file containing information about perennial sources,
+prepares the data for SQL insertion, and inserts the data into a MySQL database.
+"""
+
 import csv
 import re
 import pymysql
 from credentials import hostname, dbname, username, password
 
 def process_csv(input_file):
+    """
+    Process the input CSV file and extracts relevant information.
+
+    Args:
+        input_file (str): Path to the input CSV file.
+
+    Returns:
+        list: A list of dictionaries containing the processed rows.
+    """
     output_rows = []
     with open(input_file, 'r') as csvfile:
         csvreader = csv.DictReader(csvfile)
@@ -55,6 +69,13 @@ def process_csv(input_file):
     return output_rows
 
 def write_csv(output_file, output_rows):
+    """
+    Write the processed output rows to a new CSV file.
+    
+    Args:
+        output_file (str): Path to the output CSV file.
+        output_rows (list): List of dictionaries containing the processed rows.
+    """
     fieldnames = ["typeOfSource", "name", "url", "url_alt", "assessmentStatus",
                   "assessmentFootnote", "discussionSummary", "discussionSummaryFootnote"]
     with open(output_file, 'w', newline='') as csvfile:
@@ -64,6 +85,15 @@ def write_csv(output_file, output_rows):
             writer.writerow(row)
 
 def prep_csv_for_sql(input_file):
+    """
+    Prepare the input CSV file for SQL insertion by mapping assessment status to integers.
+    
+    Args:
+        input_file (str): Path to the input CSV file.
+
+    Returns:
+        list: A list of dictionaries containing the processed rows for SQL insertion.
+    """
     status_map = {
         "pending": 0,
         "vsn": 1,
@@ -96,6 +126,15 @@ def prep_csv_for_sql(input_file):
     return output_rows
 
 def insert_into_db(rows):
+    """
+    Insert the prepared rows into the database.
+
+    Args:
+        rows (list): List of dictionaries containing the processed rows for SQL insertion.
+
+    Raises:
+        Exception: If there's an error inserting data into the database.
+    """
     try:
         conn = pymysql.connect(user=username, password=password,
                                host=hostname, database=dbname)

@@ -3,6 +3,12 @@ from wikidataintegrator import wdi_core, wdi_login
 from credentials import wikibase_username, wikibase_password
 
 def wikibase_domains_query():
+    """
+    Query the Domains Wikibase for items and their domain values (property P1).
+
+    Returns:
+        dict: JSON response containing the results of the SPARQL query.
+    """
     query = '''
     PREFIX wdt: <https://domains.wikibase.cloud/prop/direct/>
     PREFIX wd: <https://domains.wikibase.cloud/entity/>
@@ -18,6 +24,12 @@ def wikibase_domains_query():
     return response.json()
 
 def fetch_wikidata_official_websites():
+    """
+    Fetch official website (property P856) values for items from Wikidata.
+
+    Returns:
+        dict: JSON response containing the results of the SPARQL query.
+    """
     query = '''
     SELECT ?item ?website
     WHERE {
@@ -30,10 +42,27 @@ def fetch_wikidata_official_websites():
     return response.json()
 
 def is_root_domain(official_website, domain):
+    """
+    Check if an official website URL corresponds to a root domain.
+
+    Args:
+        official_website (str): Official website URL.
+        domain (str): Domain to check against.
+
+    Returns:
+        bool: True if the URL is a root domain, False otherwise.
+    """
     url_without_domain = official_website[len(domain):]
     return not url_without_domain or url_without_domain == "/" or url_without_domain.startswith("/?")
 
 def update_wikibase_item(wikibase_item, wikidata_item):
+    """
+    Prepares edit for the named Wikibase item
+
+    Args:
+        wikibase_item (str): Domains Wikibase item ID to update.
+        wikidata_item (str): Wikidata item ID to associate with the Wikibase item.
+    """
     login_instance = wdi_login.WDLogin(
         user=wikibase_username,
         pwd=wikibase_password,
@@ -56,6 +85,13 @@ def update_wikibase_item(wikibase_item, wikidata_item):
     item.write(login_instance)
 
 def main():
+    """
+    Main function to execute the script.
+
+    This function queries the Domains Wikibase for domain values and Wikidata for
+    official website values, checks if the website corresponds to a root domain,
+    and updates the Wikibase item with the corresponding Wikidata item ID.
+    """
     prefixes = ["http://", "https://", "http://www.", "https://www."]
     domain_results = wikibase_domains_query()
     

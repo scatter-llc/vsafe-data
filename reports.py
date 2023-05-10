@@ -8,6 +8,12 @@ connection = create_conn()
 cursor = connection.cursor() if connection is not None else None
 
 def get_last_updated():
+    """
+    Retrieves the most recent 'last updated' timestamp in the 'urls' table.
+
+    Returns:
+        int: The maximum last_updated value from the 'urls' table.
+    """
     max_last_updated_query = '''
     SELECT MAX(last_updated) as max_last_updated
     FROM urls
@@ -15,6 +21,12 @@ def get_last_updated():
     return execute_scalar(connection, max_last_updated_query)
 
 def generate_wikipage():
+    """
+    Generates wiki page content based on several database queries.
+
+    Returns:
+        str: The wiki page content as a formatted string.
+    """
     last_updated = get_last_updated()
 
     articles_in_scope_query = '''

@@ -5,8 +5,16 @@ import urllib.parse
 from utility import *
 from db import *
 
-# Get the required domain_id and count from the database
 def get_domains_and_counts(connection):
+    """
+    Retrieves domain names and number of usages from the database.
+
+    Args:
+        connection (pymysql.connections.Connection): Database connection.
+
+    Returns:
+        List[Tuple[int, str, int]]: List of tuples containing domain_id, domain name, and count.
+    """
     cursor = connection.cursor()
     query = """
         SELECT domains.id, domains.domain, COUNT(urls.domain_id) AS count
@@ -23,8 +31,17 @@ def get_domains_and_counts(connection):
     cursor.close()
     return result
 
-# Insert the new alerts in the existing wikitext
 def insert_alerts(alerts, wikitext):
+    """
+    Inserts the new alerts into the existing wikitext.
+
+    Args:
+        alerts (List[str]): List of new alerts to be inserted.
+        wikitext (str): The current wikitext.
+
+    Returns:
+        str: Updated wikitext with new alerts inserted.
+    """
     start_index = wikitext.index("{{Alert list") + len("{{Alert list")
 
     for alert in reversed(alerts):
@@ -32,8 +49,16 @@ def insert_alerts(alerts, wikitext):
 
     return wikitext
 
-# Load wikitext from the given URL
 def load_wikitext(url):
+    """
+    Fetches wikitext from the specified URL.
+
+    Args:
+        url (str): URL to fetch the wikitext from.
+
+    Returns:
+        str: Wikitext fetched from the URL or None if there is an error.
+    """
     response = requests.get(url)
     if response.status_code == 200:
         return response.text
@@ -41,8 +66,16 @@ def load_wikitext(url):
         print(f"Error while loading wikitext from URL: {response.status_code}")
         return None
 
-# Renumber notifications and align parameter names, equal signs, and values
 def renumber_and_align(wikitext):
+    """
+    Renumber the notifications and align the parameter names, equal signs, and values in the wikitext.
+
+    Args:
+        wikitext (str): The misnumbered wikitext
+
+    Returns:
+        str: Renumbered and aligned wikitext.
+    """
     lines = wikitext.split('\n')
     counter = 1
 
@@ -57,8 +90,16 @@ def renumber_and_align(wikitext):
 
     return '\n'.join(lines)
 
-# Fetch flagged domains and articles from the database
 def get_flagged_domains_and_articles(connection):
+    """
+    Retrieves flagged domains and articles from the database.
+
+    Args:
+        connection (pymysql.connections.Connection): Database connection.
+
+    Returns:
+        List[Tuple[str, int, str]]: List of tuples containing domain, status, and url_appeared_on.
+    """
     cursor = connection.cursor()
     query = """
         SELECT domains.domain, domains.status, urls.url_appeared_on
@@ -74,6 +115,19 @@ def get_flagged_domains_and_articles(connection):
     return result
 
 def format_alert_string(i, type_line, msg_line, action_line, time_line):
+    """
+    Formats alert string with given parameters.
+
+    Args:
+        i (int): Alert index.
+        type_line (str): Alert type line.
+        msg_line (str): Alert message line.
+        action_line (str): Alert action line.
+        time_line (str): Alert time line.
+
+    Returns:
+        str: Formatted alert string.
+    """
     return f"""| type{i}   = {type_line}
 | msg{i}     = {msg_line}
 | action{i}  = {action_line}
