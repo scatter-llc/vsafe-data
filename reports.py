@@ -158,4 +158,5 @@ def generate_wikipage():
     return wiki_page
 
 # Print the wiki page content
-print(generate_wikipage())
+if __name__ == '__main__':
+    print(generate_wikipage())

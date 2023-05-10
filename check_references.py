@@ -98,8 +98,7 @@ def process_wikipedia_urls(article_urls, connection):
                 )
                 connection.commit()
 
-
-if __name__ == "__main__":
+def go():
     article_urls = get_list.get_vsafe_set()
 
     connection = pymysql.connect(
@@ -114,3 +113,6 @@ if __name__ == "__main__":
         process_wikipedia_urls(article_urls, connection)
     finally:
         connection.close()
+
+if __name__ == "__main__":
+    go()

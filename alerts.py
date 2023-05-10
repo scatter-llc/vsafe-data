@@ -103,7 +103,7 @@ def create_alerts(alert_type, data):
 
     return alerts
 
-def main():
+def get_alerts_page():
     connection = create_conn()
     if connection:
         domains_and_counts = get_domains_and_counts(connection)
@@ -119,7 +119,6 @@ def main():
         if wikitext:
             updated_wikitext = insert_alerts(alerts, wikitext)
             final_wikitext = renumber_and_align(updated_wikitext)
-            print(final_wikitext)
 
             update_column(
                 connection,
@@ -138,6 +137,7 @@ def main():
             )
 
             connection.close()
+            return final_wikitext
 
 if __name__ == "__main__":
-    main()
+    get_alerts_page()
