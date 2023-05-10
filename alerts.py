@@ -1,7 +1,5 @@
-import pymysql
 import re
 import requests
-import urllib.parse
 from utility import *
 from db import *
 
@@ -116,14 +114,14 @@ def get_flagged_domains_and_articles(connection):
 
 def format_alert_string(i, type_line, msg_line, action_line, time_line):
     """
-    Formats alert string with given parameters.
+    Formats template parameters with given parameters.
 
     Args:
         i (int): Alert index.
-        type_line (str): Alert type line.
-        msg_line (str): Alert message line.
-        action_line (str): Alert action line.
-        time_line (str): Alert time line.
+        type_line (str): Alert "type" parameter.
+        msg_line (str): Alert "message" parameter.
+        action_line (str): Alert "action" parameter.
+        time_line (str): Alert "time" parameter.
 
     Returns:
         str: Formatted alert string.
@@ -134,6 +132,16 @@ def format_alert_string(i, type_line, msg_line, action_line, time_line):
 | time{i}    = {time_line}"""
 
 def create_alerts(alert_type, data):
+    """
+    Creates template parameters for Alert list call
+
+    Args:
+        alert_type (str): Type of the alert ("frequent-domain" or "flagged-domain").
+        data (List[Tuple]): List of tuples containing the data to generate alerts.
+
+    Returns:
+        List[str]: List of alert strings.
+    """
     alerts = []
 
     for i, item in enumerate(data, 1):
@@ -158,6 +166,12 @@ def create_alerts(alert_type, data):
     return alerts
 
 def get_alerts_page():
+    """
+    Generates the updated alerts page wikitext with new frequent-domain and flagged-domain alerts.
+
+    Returns:
+        str: Updated alerts page wikitext.
+    """
     connection = create_conn()
     if connection:
         domains_and_counts = get_domains_and_counts(connection)

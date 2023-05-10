@@ -2,9 +2,8 @@ import datetime
 import pymysql
 import re
 import requests
-import time
 from tld import get_fld
-from urllib.parse import quote, urlparse
+from urllib.parse import urlparse
 from credentials import hostname, dbname, username, password
 from pageset import get_list
 

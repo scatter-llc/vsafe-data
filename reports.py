@@ -1,5 +1,3 @@
-import pymysql
-from urllib.parse import urlparse, unquote
 from utility import *
 from db import *
 

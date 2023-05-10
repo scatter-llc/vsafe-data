@@ -71,7 +71,7 @@ def process_csv(input_file):
 def write_csv(output_file, output_rows):
     """
     Write the processed output rows to a new CSV file.
-    
+
     Args:
         output_file (str): Path to the output CSV file.
         output_rows (list): List of dictionaries containing the processed rows.
@@ -87,7 +87,7 @@ def write_csv(output_file, output_rows):
 def prep_csv_for_sql(input_file):
     """
     Prepare the input CSV file for SQL insertion by mapping assessment status to integers.
-    
+
     Args:
         input_file (str): Path to the input CSV file.
 
