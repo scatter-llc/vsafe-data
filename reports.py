@@ -165,9 +165,9 @@ def generate_wikipage():
     wiki_page += """
 |}
 """
-
+    print(wiki_page)
     return wiki_page
 
 # Print the wiki page content
 if __name__ == '__main__':
-    print(generate_wikipage())
+    generate_wikipage()

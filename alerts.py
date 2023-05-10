@@ -187,6 +187,7 @@ def get_alerts_page():
         if wikitext:
             updated_wikitext = insert_alerts(alerts, wikitext)
             final_wikitext = renumber_and_align(updated_wikitext)
+            print(final_wikitext)
 
             update_column_with_conditions(
                 connection,
