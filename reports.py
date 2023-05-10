@@ -127,7 +127,7 @@ def generate_wikipage():
 | percent_unknown = {links_to_unknown_domains}
 }}}}</onlyinclude>
 
-==Frequent domain use==
+==Frequent use of unknown domains==
 {{| class="wikitable sortable"
 ! Domain
 ! Count
