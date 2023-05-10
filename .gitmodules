@@ -1,0 +1,3 @@
+[submodule "pageset"]
+	path = pageset
+	url = https://github.com/scatter-llc/pageset

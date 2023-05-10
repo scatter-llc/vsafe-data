@@ -6,6 +6,7 @@ import time
 from tld import get_fld
 from urllib.parse import quote, urlparse
 from credentials import hostname, dbname, username, password
+from pageset import get_list
 
 def get_external_links_and_domains(article_url):
     article_title = article_url.replace("https://en.wikipedia.org/wiki/", "").replace("_", " ")
@@ -99,11 +100,7 @@ def process_wikipedia_urls(article_urls, connection):
 
 
 if __name__ == "__main__":
-    with open('vsafe-uniq.txt') as f:
-        article_urls = [
-            f"https://en.wikipedia.org/wiki/{line.strip().replace(' ', '_')}"
-            for line in f
-        ]
+    article_urls = get_list.get_vsafe_set()
 
     connection = pymysql.connect(
         host=hostname,
