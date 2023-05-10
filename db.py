@@ -37,10 +37,11 @@ def update_column(connection, table, column, value, conditions):
     cursor = connection.cursor()
 
     for condition_values in conditions:
+        where_clause = conditions_to_where_clause(conditions)
         query = f"""
             UPDATE {table}
             SET {column} = {value}
-            WHERE {conditions_to_where_clause(conditions)};
+            WHERE {where_clause};
         """
         cursor.execute(query, condition_values)
 
