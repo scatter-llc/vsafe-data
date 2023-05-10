@@ -118,6 +118,7 @@ def generate_wikipage():
 
     # Create the wiki page content
     wiki_page = f"""
+{{{{Vaccine safety tabs}}}}
 <onlyinclude>{{{{VSAFE metrics dashboard
 | articles = {articles_in_scope}
 | domains = {domains_linked}
