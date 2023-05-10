@@ -18,7 +18,7 @@ This repository includes:
 
 7. `pip3 install -r requirements.txt`
 
-8. Create a MySQL (or MariaDB) database if you have not yet. (Schema forthcoming)
+8. Create a MySQL (or MariaDB) database and import `schema.sql`
 
 9. Set up `credentials.py` (for database and Domains Wikibase access) like this:
 
