@@ -125,6 +125,7 @@ def generate_wikipage():
 | percent_reliable = {links_to_known_reliable_sources}
 | percent_flagged = {links_to_flagged_sources}
 | percent_unknown = {links_to_unknown_domains}
+| last_updated = ~~~~~
 }}}}</onlyinclude>
 
 ==Frequent use of unknown domains==
